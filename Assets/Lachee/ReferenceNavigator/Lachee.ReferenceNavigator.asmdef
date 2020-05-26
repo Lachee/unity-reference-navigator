@@ -1,0 +1,17 @@
+{
+    "name": "Lachee.ReferenceNavigator.Plugins",
+    "references": [
+        "GUID:5806a3000d8e85b41a31982c0b3d9cd3"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

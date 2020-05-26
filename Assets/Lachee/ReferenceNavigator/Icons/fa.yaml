@@ -1,0 +1,15 @@
+projectName: Reference Navigator
+version: 5.13.0
+icons:
+  - file-search:
+      - regular
+  - search:
+      - regular
+  - location:
+      - regular
+  - location-arrow:
+      - regular
+  - file-import:
+      - regular
+  - eye:
+      - regular
