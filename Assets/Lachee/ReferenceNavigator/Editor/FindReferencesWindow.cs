@@ -198,7 +198,7 @@ namespace Lachee.ReferenceNavigator.Editor
         {
             GUILayout.Label("Base Settings", EditorStyles.boldLabel);
             searchObject = EditorGUILayout.ObjectField("Asset", searchObject, typeof(Object), false);
-            searchType = (SearchType)EditorGUILayout.EnumFlagsField("Pattern", searchType);
+            //searchType = (SearchType)EditorGUILayout.EnumFlagsField("Pattern", searchType);
 
             EditorGUILayout.BeginHorizontal();
 
