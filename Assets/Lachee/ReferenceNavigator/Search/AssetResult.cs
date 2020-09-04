@@ -21,6 +21,12 @@ namespace Lachee.ReferenceNavigator.Search
         public string name { get { return assetObject ? assetObject.name : null; } }
 
         /// <summary>
+        /// The GUID of the asset
+        /// </summary>
+        public string guid => _guid == null ? (_guid = AssetDatabase.AssetPathToGUID(assetPath)) : _guid;
+        private string _guid = null;
+
+        /// <summary>
         /// Path of the object
         /// </summary>
         public string assetPath;

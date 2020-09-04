@@ -24,13 +24,19 @@ namespace Lachee.ReferenceNavigator.Editor
         public bool IsPaused => pauseSearching;
         [SerializeField] private bool pauseSearching = false;
 
+        public int previousReferenceCount {
+            get => EditorPrefs.GetInt("_lastReferenceCount", 0);
+            set { EditorPrefs.SetInt("_lastReferenceCount", value); }
+        }
+
+
         public bool IsSearching => enumerator != null;
         private IEnumerator enumerator;
 
         /// <summary>
         /// Searches one match at a time
         /// </summary>
-        private bool incrementalSearch = true;
+        private bool incrementalSearch = false;
 
         /// <summary>
         /// The type we should be searching
@@ -68,8 +74,12 @@ namespace Lachee.ReferenceNavigator.Editor
         /// </summary>
         public void Count()
         {
+            //Store the last cap
+            if (counts != null && counts.Count != 0)
+                previousReferenceCount = counts.Count;
+
             //Clear the counts and enumerate
-            counts = new Dictionary<string, CountResult>(150);
+            counts = new Dictionary<string, CountResult>(1000);
             enumerator = AssetSearch.CountAssetsEnumerator(searchType, incrementalSearch, counts);
             pauseSearching = false;
         }
@@ -87,24 +97,32 @@ namespace Lachee.ReferenceNavigator.Editor
         void OnGUI()
         {
             //Order selection
-            this.order = (Order) EditorGUILayout.EnumPopup("Display Order", this.order);
+            this.order = (Order) EditorGUILayout.EnumPopup(new GUIContent("Display Order", "How to order the counts"), this.order);
+
+            EditorGUI.BeginDisabledGroup(IsSearching);
+            incrementalSearch = EditorGUILayout.Toggle(new GUIContent("Incremental Search", "Enables the search to take breaks in the middle of files. This will make large files not freeze the editor"), incrementalSearch);
+            EditorGUI.EndDisabledGroup();
+
 
             //Search Button
             if (IsSearching)
             {
-                if (IsPaused && GUILayout.Button("Continue"))
-                    Unpause();
+                EditorGUILayout.BeginHorizontal();
+                {
+                    if (IsPaused && GUILayout.Button(new GUIContent("Resume", "Continues the search from the point it was paused")))
+                        Unpause();
 
-                if (!IsPaused && GUILayout.Button("Pause"))
-                    Pause();
+                    if (!IsPaused && GUILayout.Button(new GUIContent("Pause", "Pauses the search")))
+                        Pause();
 
-                if (GUILayout.Button("Stop"))
-                    enumerator = null;
+                    if (GUILayout.Button(new GUIContent("Stop", "Stops the search")))
+                        enumerator = null;
+                }
+                EditorGUILayout.EndHorizontal();
             }
             else
             {
-                incrementalSearch = EditorGUILayout.Toggle("Incremental search", incrementalSearch);
-                if (GUILayout.Button("Begin"))
+                if (GUILayout.Button(new GUIContent("Begin Count", "Starts search all the assets and counts their references")))
                     Count();
             }
 
@@ -112,17 +130,28 @@ namespace Lachee.ReferenceNavigator.Editor
                 DrawResults();
         }
 
+        private void DrawProgressBar(Rect position, string text)
+        {
+            int max = previousReferenceCount;
+            EditorGUI.ProgressBar(position, counts.Count / (float)max, text);
+            //max = previousReferenceCount + Mathf.FloorToInt((counts.Count / (float)previousReferenceCount) * 100);
+        }
+
         private void DrawResults()
         {
             //Draw helpbox
             if (IsSearching)
             {
-                EditorGUILayout.HelpBox("Searching " + AssetSearch.LastSearchedAsset, MessageType.None);
+                //EditorGUILayout.HelpBox(, MessageType.None);
+
+                var rect = EditorGUILayout.GetControlRect();
+                DrawProgressBar(rect, "Searching " + AssetSearch.LastSearchedAsset);
             }
             else
             {
                 EditorGUILayout.HelpBox("Searched " + counts.Count + " assets", MessageType.None);
             }
+
 
             //Draw scroll view
             scroll = EditorGUILayout.BeginScrollView(scroll);
@@ -149,7 +178,7 @@ namespace Lachee.ReferenceNavigator.Editor
                         //Draw the objects
                         EditorGUILayout.ObjectField(keypair.Value.asset, typeof(Object), true);
                         EditorGUILayout.LabelField(keypair.Value.count.ToString());
-                        if (GUILayout.Button(IconManager.Search, IconManager.LayoutOptions))
+                        if (GUILayout.Button(new GUIContent(IconManager.Search, "Find All References to this asset"), IconManager.LayoutOptions))
                         {
                             FindReferencesWindow.OpenWindowSearchObject(keypair.Value.asset);
                             Pause();
@@ -168,8 +197,10 @@ namespace Lachee.ReferenceNavigator.Editor
             {
                 if (!enumerator.MoveNext() || !enumerator.MoveNext() || !enumerator.MoveNext())
                 {
+                    //We have finished.
                     enumerator = null;
                     pauseSearching = true;
+                    previousReferenceCount = counts.Count;
                 } 
                 else
                 {

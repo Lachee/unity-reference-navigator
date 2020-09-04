@@ -19,6 +19,11 @@ namespace Lachee.ReferenceNavigator.Search
     public static class AssetSearch
     {
         /// <summary>
+        /// Max number of iterations before we force a break
+        /// </summary>
+        public static int MaxSearchIteration = 100;
+
+        /// <summary>
         /// Last path to the asset we are searching
         /// </summary>
         public static string LastSearchedAsset { get; private set; }
@@ -43,9 +48,9 @@ namespace Lachee.ReferenceNavigator.Search
         /// <summary>
         /// Counts occurances of every asset
         /// </summary>
-        /// <param name="filter"></param>
-        /// <param name="incremental"></param>
-        /// <param name="results"></param>
+        /// <param name="filter">Search Filter</param>
+        /// <param name="incremental">Should it yield between each subfile it searched</param>
+        /// <param name="results">Map between GUID and their counts</param>
         /// <returns></returns>
         public static IEnumerator CountAssetsEnumerator(SearchType filter, bool incremental, Dictionary<string, CountResult> results)
         {
@@ -53,21 +58,30 @@ namespace Lachee.ReferenceNavigator.Search
             var assets = FindAssets(filter);
             foreach(var asset in assets) {
 
+                //If wea re not on the list yet, then add ourselves
+                if (!results.ContainsKey(asset.guid))
+                    results.Add(asset.guid, new CountResult(asset.guid));
+                
                 //Skip asset types that are large and cannot have references.
                 if (asset.assetType == typeof(LightingDataAsset)) continue;
                 if (asset.assetType == typeof(AudioClip)) continue;
                 if (asset.assetType == typeof(VideoClip)) continue;
                 if (asset.assetType == typeof(Texture2D)) continue;
 
-                //Prepare the reference and link it back
+                //Set the search asset and yield so the GUI has time to update the dispaly
                 LastSearchedAsset = asset.assetPath;
                 yield return null;
 
+                //Count all the seperate GUID in this file
                 var enumerator = YamlSearch.CountReferences(asset.assetPath, results);
+                int iteration = 0;
                 while (enumerator.MoveNext())
                 {
-                    if (incremental)
+                    if (incremental || ++iteration > MaxSearchIteration)
+                    {
+                        iteration = 0;
                         yield return null;
+                    }
                 }
             }
         }
