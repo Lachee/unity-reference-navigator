@@ -9,3 +9,7 @@ Additionally, when searching for scripts, it will use the Roslyn compiler to ana
 
 ## Install
 A package can be found under the [AppVeyor artifacts](https://ci.appveyor.com/project/Lachee/unity-reference-navigator/build/artifacts).
+
+## TODO
+- We need support for Addressables, as they use completely different metadata. 
+- - It will likely be a sub module that you add on as I dont wish to create a dependency for the addressables.
