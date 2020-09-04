@@ -9,3 +9,11 @@ Additionally, when searching for scripts, it will use the Roslyn compiler to ana
 
 ## Install
 A package can be found under the [AppVeyor artifacts](https://ci.appveyor.com/project/Lachee/unity-reference-navigator/build/artifacts).
+
+## TODO
+- We need support for Addressables, as they use completely different metadata.  
+  - It will likely be a sub module that you add on as I dont wish to create a dependency for the addressables.
+- Add support for ScriptableObjects
+  - They work. However, they behave like MonoBehaviours at the moment. This causes their scripting reference to be searched rather than the asset itself. Should be a simple change "in theory".
+- Add a warning for non-monobehaviour scripts
+  - They should be searched using VS because they could contain multiple classes.
