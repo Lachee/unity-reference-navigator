@@ -17,3 +17,4 @@ A package can be found under the [AppVeyor artifacts](https://ci.appveyor.com/pr
   - They work. However, they behave like MonoBehaviours at the moment. This causes their scripting reference to be searched rather than the asset itself. Should be a simple change "in theory".
 - Add a warning for non-monobehaviour scripts
   - They should be searched using VS because they could contain multiple classes.
+- Add a filter so we can ignore soem folders (like Localisation)
