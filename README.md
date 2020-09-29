@@ -18,3 +18,4 @@ A package can be found under the [AppVeyor artifacts](https://ci.appveyor.com/pr
 - Add a warning for non-monobehaviour scripts
   - They should be searched using VS because they could contain multiple classes.
 - Add a filter so we can ignore soem folders (like Localisation)
+- Add a way to filter results
